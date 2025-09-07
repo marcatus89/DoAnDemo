@@ -1,0 +1,76 @@
+    @page "/admin/users/manage-roles/{UserId}"
+    @attribute [Authorize(Roles = "Admin")]
+    @using Microsoft.AspNetCore.Identity
+    @using Microsoft.EntityFrameworkCore
+    @inject UserManager<IdentityUser> UserManager
+    @inject RoleManager<IdentityRole> RoleManager
+    @inject NavigationManager Navigation
+
+    <h3>Quản lý Quyền cho: @Model.UserName</h3>
+
+    @if(Model.UserId != null)
+    {
+        <EditForm Model="@Model" OnValidSubmit="HandleValidSubmit">
+            @foreach (var role in Model.Roles)
+            {
+                <div class="form-check">
+                    <InputCheckbox @bind-Value="role.IsSelected" class="form-check-input" id="@role.RoleName" />
+                    <label class="form-check-label" for="@role.RoleName">@role.RoleName</label>
+                </div>
+            }
+            <button type="submit" class="btn btn-primary mt-3">Lưu thay đổi</button>
+            <a href="/admin/users" class="btn btn-secondary mt-3">Quay lại</a>
+        </EditForm>
+    }
+    else
+    {
+        <p>Không tìm thấy người dùng.</p>
+    }
+
+
+    @code {
+        [Parameter]
+        public string? UserId { get; set; }
+
+        private UserRolesViewModel Model { get; set; } = new();
+
+        protected override async Task OnParametersSetAsync()
+        {
+            if (!string.IsNullOrEmpty(UserId))
+            {
+                var user = await UserManager.FindByIdAsync(UserId);
+                if (user != null)
+                {
+                    Model.UserId = user.Id;
+                    Model.UserName = user.UserName ?? string.Empty;
+
+                    var allRoles = await RoleManager.Roles.ToListAsync();
+                    var userRoles = await UserManager.GetRolesAsync(user);
+
+                    foreach (var role in allRoles)
+                    {
+                        Model.Roles.Add(new RoleViewModel
+                        {
+                            RoleName = role.Name ?? string.Empty,
+                            IsSelected = userRoles.Contains(role.Name ?? string.Empty)
+                        });
+                    }
+                }
+            }
+        }
+
+        private async Task HandleValidSubmit()
+        {
+            var user = await UserManager.FindByIdAsync(Model.UserId);
+            if (user != null)
+            {
+                var userRoles = await UserManager.GetRolesAsync(user);
+                // Xóa tất cả vai trò cũ và thêm lại các vai trò mới được chọn
+                await UserManager.RemoveFromRolesAsync(user, userRoles);
+                await UserManager.AddToRolesAsync(user, Model.Roles.Where(r => r.IsSelected).Select(r => r.RoleName));
+
+                Navigation.NavigateTo("/admin/users");
+            }
+        }
+    }
+    

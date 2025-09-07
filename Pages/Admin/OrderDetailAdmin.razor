@@ -1,0 +1,137 @@
+@page "/admin/orders/{OrderId:int}"
+@attribute [Authorize(Roles = "Admin, Sales, Accounting, Warehouse, Logistics")]
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
+@inject NavigationManager Navigation
+
+<h3>Chi tiết Đơn hàng #@OrderId</h3>
+
+@if (CurrentOrder == null)
+{
+    <p><em>Đang tìm đơn hàng...</em></p>
+}
+else
+{
+    <!-- ... Phần hiển thị thông tin khách hàng giữ nguyên ... -->
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Thông tin Khách hàng</h4>
+            <p><strong>Tên:</strong> @CurrentOrder.CustomerName</p>
+            <p><strong>Địa chỉ:</strong> @CurrentOrder.ShippingAddress</p>
+            <p><strong>Số điện thoại:</strong> @CurrentOrder.PhoneNumber</p>
+            <p><strong>Ngày đặt:</strong> @CurrentOrder.OrderDate.ToString("g")</p>
+        </div>
+        <div class="col-md-6">
+            <h4>Cập nhật Trạng thái</h4>
+            <p><strong>Trạng thái hiện tại:</strong> <span class="badge bg-success">@CurrentOrder.Status</span></p>
+
+            <!-- Dùng AuthorizeView để hiển thị dropdown phù hợp với từng vai trò -->
+            <AuthorizeView Roles="Admin">
+                @* Admin có thể thay đổi thành bất kỳ trạng thái nào *@
+                <div class="input-group">
+                    <select class="form-select" @bind="newStatus">
+                        <option value="Chờ xác nhận">Chờ xác nhận</option>
+                        <option value="Chờ thanh toán">Chờ thanh toán</option>
+                        <option value="Đã thanh toán">Đã thanh toán</option>
+                        <option value="Sẵn sàng giao hàng">Sẵn sàng giao hàng</option>
+                        <option value="Đang giao">Đang giao</option>
+                        <option value="Hoàn thành">Hoàn thành</option>
+                        <option value="Đã hủy">Đã hủy</option>
+                    </select>
+                    <button class="btn btn-primary" @onclick="UpdateStatus">Cập nhật (Admin)</button>
+                </div>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Sales">
+                @if (CurrentOrder.Status == "Chờ xác nhận")
+                {
+                    <div class="input-group">
+                        <select class="form-select" @bind="newStatus">
+                            <option value="Chờ thanh toán">Xác nhận đơn hàng</option>
+                            <option value="Đã hủy">Hủy đơn hàng</option>
+                        </select>
+                        <button class="btn btn-primary" @onclick="UpdateStatus">Cập nhật</button>
+                    </div>
+                }
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Accounting">
+                 @if (CurrentOrder.Status == "Chờ thanh toán")
+                {
+                    <button class="btn btn-success" @onclick='() => { newStatus = "Đã thanh toán"; UpdateStatus(); }'>Xác nhận đã thanh toán</button>
+                }
+            </AuthorizeView>
+
+             <AuthorizeView Roles="Warehouse">
+                 @if (CurrentOrder.Status == "Đã thanh toán")
+                {
+                    <button class="btn btn-info" @onclick='() => { newStatus = "Sẵn sàng giao hàng"; UpdateStatus(); }'>Xác nhận đã chuẩn bị hàng</button>
+                }
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Logistics">
+                 @if (CurrentOrder.Status == "Sẵn sàng giao hàng")
+                {
+                    <button class="btn btn-warning" @onclick='() => { newStatus = "Đang giao"; UpdateStatus(); }'>Xác nhận lấy hàng đi giao</button>
+                }
+                 else if (CurrentOrder.Status == "Đang giao")
+                {
+                    <button class="btn btn-success" @onclick='() => { newStatus = "Hoàn thành"; UpdateStatus(); }'>Xác nhận đã giao thành công</button>
+                }
+            </AuthorizeView>
+        </div>
+    </div>
+
+    <!-- ... Phần hiển thị chi tiết sản phẩm giữ nguyên ... -->
+    <h4 class="mt-4">Các sản phẩm trong đơn</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Sản phẩm</th>
+                <th>Số lượng</th>
+                <th>Đơn giá</th>
+                <th>Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var detail in CurrentOrder.OrderDetails)
+            {
+                <tr>
+                    <td>@detail.ProductName</td>
+                    <td>@detail.Quantity</td>
+                    <td>@detail.Price.ToString("n0")</td>
+                    <td>@((detail.Quantity * detail.Price).ToString("n0"))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public int OrderId { get; set; }
+
+    private Order? CurrentOrder;
+    private string newStatus = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentOrder = await DbContext.Orders
+                                .Include(o => o.OrderDetails)
+                                .FirstOrDefaultAsync(o => o.Id == OrderId);
+        if (CurrentOrder != null)
+        {
+            newStatus = CurrentOrder.Status;
+        }
+    }
+
+    private async Task UpdateStatus()
+    {
+        if (CurrentOrder != null && !string.IsNullOrEmpty(newStatus))
+        {
+            CurrentOrder.Status = newStatus;
+            await DbContext.SaveChangesAsync();
+            // Tùy chọn: Thêm thông báo cập nhật thành công
+        }
+    }
+}

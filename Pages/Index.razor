@@ -1,0 +1,57 @@
+﻿@page "/"
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
+
+<div class="container-fluid">
+    <div class="text-center my-4">
+        <h1>Chào mừng đến với MyBathroom</h1>
+        <p class="lead">Giải pháp toàn diện cho không gian phòng tắm hiện đại và sang trọng</p>
+    </div>
+
+    <!-- Hiển thị các sản phẩm mới nhất -->
+    <h3 class="mt-5 mb-3">Sản phẩm Mới nhất</h3>
+
+    @if (latestProducts == null)
+    {
+        <p><em>Đang tải sản phẩm...</em></p>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var product in latestProducts)
+            {
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100">
+                        <a href="@($"/san-pham/{product.Id}")">
+                            <img class="card-img-top" src="@product.ImageUrl" alt="@product.Name" style="height: 250px; object-fit: cover;">
+                        </a>
+                        <div class="card-body">
+                            <h4 class="card-title">
+                                <a href="@($"/san-pham/{product.Id}")">@product.Name</a>
+                            </h4>
+                            <h5>@product.Price.ToString("n0") VNĐ</h5>
+                            <p class="card-text">@product.Category?.Name</p>
+                        </div>
+                        <div class="card-footer text-center">
+                             <a href="@($"/san-pham/{product.Id}")" class="btn btn-primary">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<Product>? latestProducts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Lấy 3 sản phẩm mới nhất, bao gồm cả thông tin Category liên quan
+        latestProducts = await DbContext.Products
+                                .Include(p => p.Category)
+                                .OrderByDescending(p => p.Id)
+                                .Take(3)
+                                .ToListAsync();
+    }
+}

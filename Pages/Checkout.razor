@@ -1,0 +1,52 @@
+@page "/thanh-toan"
+@inject NavigationManager Navigation
+@inject OrderService OrderSvc
+@inject CartService CartSvc
+
+<h3>Thông tin Thanh toán</h3>
+
+@if (!CartSvc.Items.Any())
+{
+    <p>Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm trước khi thanh toán.</p>
+}
+else
+{
+    <EditForm Model="@order" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group mb-3">
+            <label for="customerName">Họ và tên</label>
+            <InputText id="customerName" class="form-control" @bind-Value="order.CustomerName" />
+        </div>
+        <div class="form-group mb-3">
+            <label for="shippingAddress">Địa chỉ giao hàng</label>
+            <InputText id="shippingAddress" class="form-control" @bind-Value="order.ShippingAddress" />
+        </div>
+        <div class="form-group mb-3">
+            <label for="phoneNumber">Số điện thoại</label>
+            <InputText id="phoneNumber" class="form-control" @bind-Value="order.PhoneNumber" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Xác nhận và Đặt hàng</button>
+    </EditForm>
+}
+
+@code {
+    private Order order = new Order();
+
+    private async Task HandleValidSubmit()
+    {
+        var success = await OrderSvc.PlaceOrderAsync(order);
+        if (success)
+        {
+            // Chuyển hướng đến trang xác nhận sau khi đặt hàng thành công
+            Navigation.NavigateTo("/xac-nhan-don-hang");
+        }
+        else
+        {
+            // Có thể hiển thị thông báo lỗi ở đây
+            Console.WriteLine("Đặt hàng thất bại!");
+        }
+    }
+}

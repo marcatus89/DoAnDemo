@@ -1,0 +1,75 @@
+@page "/admin/products/add"
+@page "/admin/products/edit/{ProductId:int}"
+@attribute [Authorize(Roles = "Admin")]
+@inject ApplicationDbContext DbContext
+@inject NavigationManager Navigation
+
+<h3>@Title</h3>
+
+<EditForm Model="@CurrentProduct" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group mb-3">
+        <label for="name">Tên sản phẩm</label>
+        <InputText id="name" class="form-control" @bind-Value="CurrentProduct.Name" />
+    </div>
+    <div class="form-group mb-3">
+        <label for="price">Giá</label>
+        <InputNumber id="price" class="form-control" @bind-Value="CurrentProduct.Price" />
+    </div>
+    
+    <!-- Thêm ô nhập URL hình ảnh -->
+    <div class="form-group mb-3">
+        <label for="imageUrl">URL Hình ảnh</label>
+        <InputText id="imageUrl" class="form-control" @bind-Value="CurrentProduct.ImageUrl" />
+    </div>
+
+    <!-- Hiển thị ảnh xem trước -->
+    @if (!string.IsNullOrWhiteSpace(CurrentProduct.ImageUrl))
+    {
+        <div class="mb-3">
+            <label>Ảnh xem trước:</label>
+            <img src="@CurrentProduct.ImageUrl" class="img-thumbnail" style="max-width: 200px;" alt="Image preview"/>
+        </div>
+    }
+
+    <button type="submit" class="btn btn-primary">Lưu</button>
+    <a href="/admin/products" class="btn btn-secondary">Hủy</a>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int ProductId { get; set; }
+
+    private Product CurrentProduct { get; set; } = new();
+    private string Title { get; set; } = "Thêm sản phẩm mới";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (ProductId != 0)
+        {
+            Title = "Chỉnh sửa sản phẩm";
+            var productFromDb = await DbContext.Products.FindAsync(ProductId);
+            if (productFromDb != null)
+            {
+                CurrentProduct = productFromDb;
+            }
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (ProductId == 0)
+        {
+            DbContext.Products.Add(CurrentProduct);
+        }
+        else
+        {
+            DbContext.Products.Update(CurrentProduct);
+        }
+
+        await DbContext.SaveChangesAsync();
+        Navigation.NavigateTo("/admin/products");
+    }
+}
