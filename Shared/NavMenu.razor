@@ -3,12 +3,12 @@
 
 <div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">DoAnTotNghiep</a>
-    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+    <button class="navbar-toggler">
         <span class="navbar-toggler-icon"></span>
     </button>
 </div>
 
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+<div class="d-block">
     <ul class="nav flex-column">
         <li class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
@@ -26,7 +26,6 @@
             </NavLink>
         </li>
         
-        <!-- Hiển thị link này chỉ khi người dùng có vai trò -->
         <AuthorizeView Roles="Admin, Sales, Accounting, Warehouse, Logistics">
             <li class="nav-item px-3">
                 <NavLink class="nav-link" href="admin">
@@ -38,8 +37,16 @@
 </div>
 
 @code {
+    // Xóa các dòng code không cần thiết
+    @*
     private bool collapseNavMenu = true;
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+    *@
 
     protected override void OnInitialized()
     {
@@ -49,10 +56,5 @@
     public void Dispose()
     {
         CartSvc.OnChange -= StateHasChanged;
-    }
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
     }
 }

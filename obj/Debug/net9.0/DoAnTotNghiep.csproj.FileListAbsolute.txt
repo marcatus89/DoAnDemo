@@ -248,7 +248,6 @@
 /Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/compressed/q0nzyhjus9-wk8x8xm0ah.gz
 /Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/compressed/lisrbnqj3j-sjnzgf7e1h.gz
 /Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/compressed/quow6eeltf-psxpu4y82n.gz
-/Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/compressed/sh2e58k8mv-jcs7p5hiro.gz
 /Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/compressed/9zciygj8ks-61n19gt1b8.gz
 /Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/staticwebassets.build.json
 /Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/staticwebassets.build.json.cache
@@ -260,3 +259,7 @@
 /Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/DoAnTotNghiep.pdb
 /Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/DoAnTotNghiep.genruntimeconfig.cache
 /Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/ref/DoAnTotNghiep.dll
+/Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/DoAnTotNghiep.sourcelink.json
+/Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/compressed/1ya2wix15p-l5s0wxh1qi.gz
+/Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/compressed/sh2e58k8mv-50yqh0o3vr.gz
+/Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/compressed/fbp68qa2f9-v87kahfv2g.gz

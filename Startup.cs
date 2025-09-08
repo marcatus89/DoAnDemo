@@ -31,7 +31,6 @@ namespace DoAnTotNghiep
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite(connectionString));
 
-
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddDefaultTokenProviders()
                 .AddDefaultUI()
@@ -39,10 +38,13 @@ namespace DoAnTotNghiep
 
             services.AddRazorPages();
             services.AddServerSideBlazor();
-
+            
             services.AddScoped<CartService>();
             services.AddScoped<OrderService>();
             services.AddScoped<DashboardService>();
+
+           
+            services.AddScoped<ToastService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -61,20 +63,17 @@ namespace DoAnTotNghiep
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                // Thêm dòng này để các trang Identity hoạt động
-                endpoints.MapRazorPages();
-
+                endpoints.MapRazorPages(); 
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
         }
     }
 }
-
 

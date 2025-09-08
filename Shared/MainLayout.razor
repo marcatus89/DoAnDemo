@@ -1,33 +1,13 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<div class="app-container">
+    <Header />
 
-    <div class="main">
-        <div class="top-row px-4 auth-bar">
-            <SearchForm />
-            <LoginDisplay />
+    <main class="main-content">
+        <div class="container mt-4">
+            @Body
         </div>
-        
-        <!-- Bắt đầu Layout mới với Sidebar -->
-        <div class="container-fluid mt-4">
-            <div class="row">
-                <!-- Thanh bên cho Danh mục -->
-                <div class="col-lg-3">
-                    <CategoryMenu />
-                </div>
+    </main>
 
-                <!-- Nội dung chính của trang -->
-                <div class="col-lg-9">
-                    <article class="content px-4">
-                        @Body
-                    </article>
-                </div>
-            </div>
-        </div>
-
-    </div>
+    <Footer />
 </div>
-

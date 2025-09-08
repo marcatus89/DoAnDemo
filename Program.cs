@@ -7,8 +7,6 @@ using DoAnTotNghiep.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-
 
 namespace DoAnTotNghiep
 {
@@ -28,15 +26,12 @@ namespace DoAnTotNghiep
                     var context = services.GetRequiredService<ApplicationDbContext>();
 
                     // Tự động áp dụng tất cả các migration chưa được thực thi.
-                    // Thao tác này sẽ tạo ra tất cả các bảng.
-                    if ((await context.Database.GetPendingMigrationsAsync()).Any())
-                    {
-                         await context.Database.MigrateAsync();
-                         logger.LogInformation("Database migrations applied successfully.");
-                    }
+                    await context.Database.MigrateAsync();
+                    logger.LogInformation("Database migrations applied successfully.");
 
-                    // Bây giờ, việc seed data đã an toàn vì các bảng chắc chắn đã tồn tại
-                    SeedData.Initialize(context);
+                    // Bây giờ, việc seed data đã an toàn vì các bảng chắc chắn đã tồn tồn tại
+                    // Sửa lỗi: Truyền logger vào phương thức Initialize
+                    SeedData.Initialize(context, logger);
                     await SeedIdentity.SeedRolesAndAdminAsync(services);
                 }
                 catch (Exception ex)

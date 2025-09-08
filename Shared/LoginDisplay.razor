@@ -2,8 +2,10 @@
 
 <AuthorizeView>
     <Authorized>
-        <a href="Identity/Account/Manage">Hello, @context.User.Identity?.Name!</a>
-        <a href="logout" class="nav-link btn btn-link">Log out</a>
+ <div class="d-flex justify-content-between align-items-center" style="gap:7px">
+  <a href="Identity/Account/Manage" class="nav-link p-0">Hello, @context.User.Identity?.Name!</a>
+  <a href="logout" class="btn btn-link p-0">Log out</a>
+</div>
     </Authorized>
     <NotAuthorized>
         <a href="Identity/Account/Register">Register</a>

@@ -1,40 +1,86 @@
 using Microsoft.EntityFrameworkCore;
 using DoAnTotNghiep.Models;
 using System.Linq;
+using System;
+using Microsoft.Extensions.Logging;
 
 namespace DoAnTotNghiep.Data
 {
     public static class SeedData
     {
-        public static void Initialize(ApplicationDbContext context)
+        public static void Initialize(ApplicationDbContext context, ILogger logger)
         {
-            // Chỉ chạy nếu cả hai bảng Categories và Products đều trống
-            if (context.Categories.Any() || context.Products.Any())
+            try
             {
-                return;
+                // Bước 1: Seed Categories trước
+                if (!context.Categories.Any())
+                {
+                    logger.LogInformation("Seeding categories...");
+                    context.Categories.AddRange(
+                        new Category { Name = "Bồn cầu" },
+                        new Category { Name = "Vòi sen" },
+                        new Category { Name = "Lavabo" },
+                        new Category { Name = "Vòi Lavabo" } 
+                    );
+                    context.SaveChanges();
+                    logger.LogInformation("Categories seeded successfully.");
+                }
+
+                // Bước 2: Seed Products sau khi đã có Categories
+                if (!context.Products.Any())
+                {
+                    logger.LogInformation("Seeding products...");
+                    // Lấy ID của các category vừa tạo
+                    var bonCauCategory = context.Categories.FirstOrDefault(c => c.Name == "Bồn cầu");
+                    var voiSenCategory = context.Categories.FirstOrDefault(c => c.Name == "Vòi sen");
+                    var lavaboCategory = context.Categories.FirstOrDefault(c => c.Name == "Lavabo");
+                    var voiLavaboCategory = context.Categories.FirstOrDefault(c => c.Name == "Vòi Lavabo");
+
+
+                    if (bonCauCategory != null && voiSenCategory != null && lavaboCategory != null && voiLavaboCategory != null)
+                    {
+                        context.Products.AddRange(
+                            new Product
+                            {
+                                Name = "Bàn cầu điện tử kèm remote điều khiển MOEN - Walden - HKSW1291C",
+                                Price = 8000000M,
+                                ImageUrl = "/images/product-1.jpg",
+                                CategoryId = bonCauCategory.Id
+                            },
+                            new Product
+                            {
+                                Name = "Bộ sen tắm nóng lạnh màu SRN - 63332SRN + 2297SRN +M22072SL",
+                                Price = 29000000M,
+                                ImageUrl = "/images/product-2.jpg",
+                                CategoryId = voiSenCategory.Id
+                            },
+                            new Product
+                            {
+                                Name = "Lavabo đặt bàn Galassia - DREAM - 7300OC",
+                                Price = 26820000M,
+                                ImageUrl = "/images/product-3.jpg",
+                                CategoryId = lavaboCategory.Id
+                            },
+                            new Product 
+                            {
+                                Name = "Vòi lavabo nóng lạnh kèm xả nhấn Fiore Rubinetterie - KUBE Chrome Black - 100CN8515",
+                                Price = 1800000M,
+                                ImageUrl = "/images/product-4.jpg",
+                                CategoryId = voiLavaboCategory.Id
+                            }
+                        );
+                        context.SaveChanges();
+                        logger.LogInformation("Products seeded successfully.");
+                    }
+                    else {
+                        logger.LogWarning("Could not find all categories to seed products.");
+                    }
+                }
             }
-
-            // Tạo và lưu Categories trước để có ID
-            var categories = new Category[]
+            catch (Exception ex)
             {
-                new Category { Name = "Bồn cầu" },
-                new Category { Name = "Vòi sen" },
-                new Category { Name = "Lavabo" }
-            };
-
-            context.Categories.AddRange(categories);
-            context.SaveChanges(); // Lưu để EF gán ID cho categories
-
-            // Bây giờ mới tạo Products với CategoryId đã có
-            var products = new Product[]
-            {
-                new Product { Name = "Bồn cầu thông minh A1", Price = 5000000M, CategoryId = categories[0].Id, ImageUrl = "https://placehold.co/600x400/cccccc/333333?text=Bon+Cau+A1" },
-                new Product { Name = "Vòi sen tắm nhiệt đới B2", Price = 2500000M, CategoryId = categories[1].Id, ImageUrl = "https://placehold.co/600x400/cccccc/333333?text=Voi+Sen+B2" },
-                new Product { Name = "Lavabo sứ cao cấp C3", Price = 3000000M, CategoryId = categories[2].Id, ImageUrl = "https://placehold.co/600x400/cccccc/333333?text=Lavabo+C3" }
-            };
-            
-            context.Products.AddRange(products);
-            context.SaveChanges();
+                logger.LogError(ex, "An error occurred while seeding the data.");
+            }
         }
     }
 }
