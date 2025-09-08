@@ -1,19 +1,18 @@
 @using Microsoft.EntityFrameworkCore
 @inject ApplicationDbContext DbContext
-@inject NavigationManager Navigation
+@inject CartService CartSvc
+@implements IDisposable
 
 <header class="app-header">
-    @* Thanh thông tin phụ ở trên cùng *@
     <div class="header-top">
         <div class="container">
-            <span>Hotline: +84 93 189 48 68 | Email: contact@kbhome.com.vn</span>
+            <span>Hotline: 1900.1234 | Email: contact@mybathroom.com</span>
             <div class="header-top-right">
                 <LoginDisplay />
             </div>
         </div>
     </div>
 
-    @* Header chính chứa logo, tìm kiếm và giỏ hàng *@
     <div class="header-main">
         <div class="container">
             <a href="/" class="header-logo">
@@ -25,13 +24,12 @@
             <div class="header-actions">
                 <a href="/gio-hang" class="action-item">
                     <span class="oi oi-cart"></span>
-                    <span>Giỏ hàng</span>
+                    <span>Giỏ hàng (@CartSvc.Items.Count)</span>
                 </a>
             </div>
         </div>
     </div>
 
-    @* Menu điều hướng chính - ĐÃ SỬA LỖI *@
     <nav class="header-nav">
         <div class="container">
             <ul class="nav-menu-list">
@@ -64,7 +62,15 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // Đăng ký lắng nghe sự kiện để header tự cập nhật khi giỏ hàng thay đổi
+        CartSvc.OnChange += StateHasChanged;
         categories = await DbContext.Categories.OrderBy(c => c.Name).ToListAsync();
+    }
+
+    // Hủy đăng ký để tránh rò rỉ bộ nhớ
+    public void Dispose()
+    {
+        CartSvc.OnChange -= StateHasChanged;
     }
 }
 

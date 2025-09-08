@@ -1,7 +1,10 @@
 @page "/san-pham/{ProductId:int}"
+@using DoAnTotNghiep.Models
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.Extensions.Logging
 @inject ApplicationDbContext DbContext
+@inject CartService CartSvc
+@inject ToastService ToastSvc
 @inject ILogger<ProductDetail> Logger
 
 @if (errorMessage != null)
@@ -23,8 +26,7 @@ else
                 <h3>@product.Name</h3>
                 <h4 class="price-tag">@product.Price.ToString("n0") VNĐ</h4>
                 <p><em>Đây là mô tả chi tiết cho sản phẩm @product.Name.</em></p>
-                @* Nút thêm vào giỏ hàng đã được tạm thời vô hiệu hóa để gỡ lỗi *@
-                <button class="btn btn-primary btn-lg" disabled>
+                <button class="btn btn-primary btn-lg" @onclick="() => AddProductToCart(product)">
                     <span class="oi oi-cart"></span> Thêm vào giỏ hàng
                 </button>
             </div>
@@ -43,7 +45,6 @@ else
     {
         try
         {
-            // Chỉ tải thông tin sản phẩm cơ bản
             product = await DbContext.Products.FindAsync(ProductId);
             
             if (product == null)
@@ -55,6 +56,15 @@ else
         {
             Logger.LogError(ex, "Lỗi khi tải thông tin sản phẩm cơ bản.");
             errorMessage = "Đã có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.";
+        }
+    }
+
+    private void AddProductToCart(Product productToAdd)
+    {
+        if (productToAdd != null)
+        {
+            CartSvc.AddToCart(productToAdd);
+            ToastSvc.ShowToast("Đã thêm sản phẩm vào giỏ hàng!", ToastLevel.Success);
         }
     }
 }

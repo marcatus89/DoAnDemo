@@ -8,11 +8,14 @@
 
 @if (orderList == null)
 {
-    <p><em>Đang tải...</em></p>
+    <LoadingSpinner />
 }
 else if (!orderList.Any())
 {
-    <p>Không có đơn hàng nào phù hợp với vai trò của bạn.</p>
+    @* --- THÊM VÀO THÔNG BÁO KHI DANH SÁCH RỖNG --- *@
+    <div class="alert alert-info mt-4">
+        Không có đơn hàng nào phù hợp với vai trò của bạn ở thời điểm hiện tại.
+    </div>
 }
 else
 {
@@ -35,7 +38,7 @@ else
                     <td>@order.CustomerName</td>
                     <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
                     <td>@order.TotalAmount.ToString("n0") VNĐ</td>
-                    <td><span class="badge bg-info text-dark">@order.Status</span></td>
+                    <td><span class="badge @GetStatusBadgeClass(order.Status)">@order.Status</span></td>
                     <td>
                         <a href="@($"admin/orders/{order.Id}")" class="btn btn-sm btn-secondary">Xem chi tiết</a>
                     </td>
@@ -55,7 +58,6 @@ else
 
         var query = DbContext.Orders.AsQueryable();
 
-        // Lọc danh sách đơn hàng dựa trên vai trò của người dùng
         if (user.IsInRole("Sales"))
         {
             query = query.Where(o => o.Status == "Chờ xác nhận");
@@ -72,8 +74,22 @@ else
         {
             query = query.Where(o => o.Status == "Sẵn sàng giao hàng" || o.Status == "Đang giao");
         }
-        // Nếu là Admin, không cần lọc, sẽ thấy tất cả đơn hàng
 
         orderList = await query.OrderByDescending(o => o.OrderDate).ToListAsync();
     }
+
+    // --- THÊM HÀM NÀY ĐỂ THAY ĐỔI MÀU TRẠNG THÁI ---
+    private string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Hoàn thành" => "bg-success",
+            "Đã hủy" => "bg-danger",
+            "Đang giao" => "bg-primary",
+            "Sẵn sàng giao hàng" => "bg-warning text-dark",
+            "Chờ thanh toán" => "bg-info text-dark",
+            _ => "bg-secondary"
+        };
+    }
 }
+

@@ -11,7 +11,6 @@ namespace DoAnTotNghiep.Services
         private List<CartItem> _items = new List<CartItem>();
         public IReadOnlyList<CartItem> Items => _items.AsReadOnly();
 
-        // --- NEW: Thêm thuộc tính tính tổng tiền ---
         public decimal Total => _items.Sum(item => item.Price * item.Quantity);
 
         public void AddToCart(Product product)
@@ -34,7 +33,6 @@ namespace DoAnTotNghiep.Services
             NotifyStateChanged();
         }
 
-        // --- NEW: Thêm phương thức cập nhật số lượng ---
         public void UpdateQuantity(int productId, int quantity)
         {
             var existingItem = _items.FirstOrDefault(i => i.ProductId == productId);
@@ -46,14 +44,12 @@ namespace DoAnTotNghiep.Services
                 }
                 else
                 {
-                    // Nếu số lượng là 0, xóa sản phẩm khỏi giỏ
                     _items.Remove(existingItem);
                 }
                 NotifyStateChanged();
             }
         }
 
-        // --- NEW: Thêm phương thức xóa sản phẩm ---
         public void RemoveFromCart(int productId)
         {
             var itemToRemove = _items.FirstOrDefault(i => i.ProductId == productId);
@@ -63,12 +59,14 @@ namespace DoAnTotNghiep.Services
                 NotifyStateChanged();
             }
         }
-
-        private void NotifyStateChanged() => OnChange?.Invoke();
+        
         public void ClearCart()
         {
             _items.Clear();
             NotifyStateChanged();
         }
+
+        private void NotifyStateChanged() => OnChange?.Invoke();
     }
 }
+
