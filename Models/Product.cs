@@ -16,6 +16,10 @@ namespace DoAnTotNghiep.Models
         public int CategoryId { get; set; }
         
         public Category? Category { get; set; }
+
+        
+        [Range(0, int.MaxValue, ErrorMessage = "Số lượng tồn kho không thể là số âm.")]
+        public int StockQuantity { get; set; }
     }
 }
 

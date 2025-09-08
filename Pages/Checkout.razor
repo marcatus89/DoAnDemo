@@ -1,9 +1,16 @@
 @page "/thanh-toan"
+@attribute [Authorize]
 @inject NavigationManager Navigation
 @inject OrderService OrderSvc
 @inject CartService CartSvc
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <h3>Thông tin Thanh toán</h3>
+
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
 
 @if (!CartSvc.Items.Any())
 {
@@ -34,19 +41,28 @@ else
 
 @code {
     private Order order = new Order();
+    private string? errorMessage;
+    
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; } = default!;
 
     private async Task HandleValidSubmit()
     {
-        var success = await OrderSvc.PlaceOrderAsync(order);
-        if (success)
+        errorMessage = null; // Xóa thông báo lỗi cũ
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        // Nhận kết quả từ service
+        var resultMessage = await OrderSvc.PlaceOrderAsync(order, user);
+        
+        if (resultMessage == null) // null = thành công
         {
-            // Chuyển hướng đến trang xác nhận sau khi đặt hàng thành công
             Navigation.NavigateTo("/xac-nhan-don-hang");
         }
-        else
+        else // Có lỗi, hiển thị thông báo
         {
-            // Có thể hiển thị thông báo lỗi ở đây
-            Console.WriteLine("Đặt hàng thất bại!");
+            errorMessage = resultMessage;
         }
     }
 }
+

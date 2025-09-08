@@ -2,21 +2,12 @@
 
 <AuthorizeView>
     <Authorized>
- <div class="d-flex justify-content-between align-items-center" style="gap:7px">
-  <a href="Identity/Account/Manage" class="nav-link p-0">Hello, @context.User.Identity?.Name!</a>
-  <a href="logout" class="btn btn-link p-0">Log out</a>
-</div>
+        @* Thay đổi link để trỏ đến trang Profile *@
+        <a href="/profile">Hello, @context.User.Identity?.Name!</a>
+        <a href="logout" class="nav-link btn btn-link">Log out</a>
     </Authorized>
     <NotAuthorized>
         <a href="Identity/Account/Register">Register</a>
         <a href="Identity/Account/Login">Log in</a>
     </NotAuthorized>
 </AuthorizeView>
-
-@code{
- 
-    private void BeginLogout()
-    {
-        Navigation.NavigateTo("logout");
-    }
-}
