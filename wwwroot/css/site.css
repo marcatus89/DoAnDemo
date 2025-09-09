@@ -470,5 +470,25 @@ a:hover {
 .top-row {
     all: unset;
 }
+/* --- NEW: Improved Print Styles --- */
+@media print {
+    /* Ẩn hoàn toàn tất cả các phần tử trên trang */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Chỉ hiện thị khu vực cần in và các phần tử con của nó */
+    #printable-area, #printable-area * {
+        visibility: visible;
+    }
+
+    /* Đưa khu vực in lên đầu trang để đảm bảo nó chiếm toàn bộ không gian */
+    #printable-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+}
 
 

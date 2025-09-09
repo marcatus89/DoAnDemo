@@ -38,13 +38,14 @@ namespace DoAnTotNghiep
 
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            
+
             services.AddScoped<CartService>();
             services.AddScoped<OrderService>();
             services.AddScoped<DashboardService>();
 
-           
+
             services.AddScoped<ToastService>();
+            services.AddScoped<PurchaseOrderService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

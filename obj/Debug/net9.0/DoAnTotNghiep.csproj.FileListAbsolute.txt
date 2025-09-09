@@ -261,5 +261,5 @@
 /Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/ref/DoAnTotNghiep.dll
 /Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/DoAnTotNghiep.sourcelink.json
 /Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/compressed/1ya2wix15p-l5s0wxh1qi.gz
-/Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/compressed/sh2e58k8mv-50yqh0o3vr.gz
-/Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/compressed/fbp68qa2f9-v87kahfv2g.gz
+/Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/compressed/fbp68qa2f9-jl8be1hf96.gz
+/Users/lethien/Desktop/C#/Sanity/DoAnTotNghiep/obj/Debug/net9.0/compressed/sh2e58k8mv-0t87kkhoij.gz

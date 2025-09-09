@@ -3,6 +3,7 @@
 @using Microsoft.EntityFrameworkCore
 @inject ApplicationDbContext DbContext
 @inject NavigationManager Navigation
+@inject PurchaseOrderService PurchaseOrderSvc
 
 <h3>Tạo Đơn nhập hàng mới</h3>
 
@@ -69,7 +70,7 @@
                     @foreach (var item in newPurchaseOrder.Items)
                     {
                         <tr>
-                            <td>@(products.FirstOrDefault(p => p.Id == item.ProductId)?.Name)</td>
+                            <td>@(products?.FirstOrDefault(p => p.Id == item.ProductId)?.Name)</td>
                             <td>Số lượng: @item.Quantity</td>
                             <td>Đơn giá: @item.UnitPrice.ToString("n0")</td>
                         </tr>
@@ -108,8 +109,9 @@
 
     private async Task HandleCreatePurchaseOrder()
     {
-        DbContext.PurchaseOrders.Add(newPurchaseOrder);
-        await DbContext.SaveChangesAsync();
+        // Đảm bảo sử dụng service để tạo đơn nhập hàng
+        await PurchaseOrderSvc.CreatePurchaseOrderAsync(newPurchaseOrder);
         Navigation.NavigateTo("/admin/purchase-orders");
     }
 }
+

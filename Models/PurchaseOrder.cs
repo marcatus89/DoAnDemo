@@ -4,10 +4,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DoAnTotNghiep.Models
 {
-    // Model lưu thông tin một đơn nhập hàng
     public class PurchaseOrder
     {
         public int Id { get; set; }
+        public string PurchaseOrderNumber { get; set; } = string.Empty;
 
         [Required]
         public int SupplierId { get; set; }
@@ -15,8 +15,9 @@ namespace DoAnTotNghiep.Models
 
         public DateTime OrderDate { get; set; } = DateTime.Now;
         public DateTime? ExpectedDeliveryDate { get; set; }
-        public string Status { get; set; } = "Đã đặt hàng"; // Trạng thái: Đã đặt hàng, Đã nhận hàng
+        public string Status { get; set; } = "Đã đặt hàng"; 
 
         public virtual ICollection<PurchaseOrderItem> Items { get; set; } = new List<PurchaseOrderItem>();
     }
 }
+

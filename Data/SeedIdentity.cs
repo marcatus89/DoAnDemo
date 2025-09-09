@@ -15,52 +15,62 @@ namespace DoAnTotNghiep.Data
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             var logger = services.GetRequiredService<ILogger<Program>>();
 
-            string[] roleNames = { "Admin", "Sales", "Accounting", "Warehouse", "Logistics" };
+            // --- TẠO VAI TRÒ ---
+            // Danh sách tất cả các vai trò cần có trong hệ thống
+            string[] roleNames = { "Admin", "Sales", "Accounting", "Warehouse", "Logistics", "Purchasing" };
             foreach (var roleName in roleNames)
             {
+                // Chỉ tạo nếu vai trò chưa tồn tại
                 if (!await roleManager.RoleExistsAsync(roleName))
                 {
                     var result = await roleManager.CreateAsync(new IdentityRole(roleName));
-                    if(result.Succeeded)
+                    if (result.Succeeded)
                     {
                         logger.LogInformation($"Role '{roleName}' created successfully.");
-                    }
-                    else
-                    {
-                        logger.LogError($"Error creating role '{roleName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
                     }
                 }
             }
 
+            // --- TẠO VÀ GÁN QUYỀN CHO ADMIN ---
             var adminEmail = "admin@mybathroom.com";
-            var adminPassword = "Password123!";
-            
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
             if (adminUser == null)
             {
-                adminUser = new IdentityUser()
-                {
-                    UserName = adminEmail,
-                    Email = adminEmail,
-                    EmailConfirmed = true
-                };
-                var createResult = await userManager.CreateAsync(adminUser, adminPassword);
-                if (createResult.Succeeded)
+                adminUser = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
+                var result = await userManager.CreateAsync(adminUser, "Password123!");
+                if (result.Succeeded)
                 {
                     logger.LogInformation("Admin user created successfully.");
-                    var roleResult = await userManager.AddToRoleAsync(adminUser, "Admin");
-                    if(roleResult.Succeeded)
-                    {
-                        logger.LogInformation("Admin role assigned to admin user successfully.");
-                    }
-                     else
-                    {
-                        logger.LogError($"Error assigning admin role: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
-                    }
+                    // Gán TẤT CẢ các vai trò cho Admin
+                    await userManager.AddToRolesAsync(adminUser, roleNames);
+                    logger.LogInformation("Admin user assigned all roles.");
                 }
-                else
+            }
+            else
+            {
+                // Đảm bảo Admin luôn có đủ tất cả các quyền, kể cả khi chạy lại seed
+                logger.LogInformation("Admin user already exists. Ensuring all roles are assigned.");
+                await userManager.AddToRolesAsync(adminUser, roleNames);
+            }
+            
+            // --- TẠO TÀI KHOẢN DEMO CHO CÁC PHÒNG BAN ---
+            await CreateUserIfNotExists(userManager, logger, "purchasing@mybathroom.com", "Password123!", "Purchasing");
+            await CreateUserIfNotExists(userManager, logger, "warehouse@mybathroom.com", "Password123!", "Warehouse");
+            await CreateUserIfNotExists(userManager, logger, "sales@mybathroom.com", "Password123!", "Sales");
+            await CreateUserIfNotExists(userManager, logger, "accounting@mybathroom.com", "Password123!", "Accounting");
+            await CreateUserIfNotExists(userManager, logger, "logistics@mybathroom.com", "Password123!", "Logistics");
+        }
+
+        private static async Task CreateUserIfNotExists(UserManager<IdentityUser> userManager, ILogger logger, string email, string password, string role)
+        {
+            if (await userManager.FindByEmailAsync(email) == null)
+            {
+                var newUser = new IdentityUser { UserName = email, Email = email, EmailConfirmed = true };
+                var result = await userManager.CreateAsync(newUser, password);
+                if (result.Succeeded)
                 {
-                    logger.LogError($"Error creating admin user: {string.Join(", ", createResult.Errors.Select(e => e.Description))}");
+                    await userManager.AddToRoleAsync(newUser, role);
+                    logger.LogInformation($"User '{email}' created with role '{role}'.");
                 }
             }
         }

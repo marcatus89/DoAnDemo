@@ -3,8 +3,9 @@
 @using Microsoft.EntityFrameworkCore
 @inject ApplicationDbContext DbContext
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
 
-<h3>Chi tiết Đơn nhập hàng #@PurchaseOrderId</h3>
+<h3>Chi tiết Đơn nhập hàng</h3>
 
 @if (purchaseOrder == null)
 {
@@ -12,11 +13,81 @@
 }
 else
 {
-    <div class="card">
-        <div class="card-header">
-            <strong>Nhà cung cấp:</strong> @purchaseOrder.Supplier?.Name | 
-            <strong>Ngày đặt:</strong> @purchaseOrder.OrderDate.ToString("dd/MM/yyyy") |
-            <strong>Trạng thái:</strong> <span class="badge @(purchaseOrder.Status == "Đã nhận hàng" ? "bg-success" : "bg-warning text-dark")">@purchaseOrder.Status</span>
+    @* --- KHU VỰC IN ĐÃ ĐƯỢỢC CẬP NHẬT --- *@
+    <div id="printable-area" class="printable-container">
+        <h2 class="text-center">PHIẾU NHẬP KHO</h2>
+        <p class="text-center"><strong>Số phiếu:</strong> @purchaseOrder.PurchaseOrderNumber</p>
+        <hr />
+        <p><strong>Nhà cung cấp:</strong> @purchaseOrder.Supplier?.Name</p>
+        <p><strong>Ngày đặt hàng:</strong> @purchaseOrder.OrderDate.ToString("dd/MM/yyyy")</p>
+        <p><strong>Ngày nhận dự kiến:</strong> @purchaseOrder.ExpectedDeliveryDate?.ToString("dd/MM/yyyy")</p>
+        
+        <h4 class="mt-4">Chi tiết hàng hóa:</h4>
+        <table class="table table-bordered mt-2">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Tên Sản phẩm</th>
+                    <th>Số lượng</th>
+                    <th>Đơn giá</th>
+                    <th>Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int count = 1;
+                    decimal total = 0;
+                }
+                @foreach (var item in purchaseOrder.Items)
+                {
+                    var subtotal = item.Quantity * item.UnitPrice;
+                    total += subtotal;
+                    <tr>
+                        <td>@(count++)</td>
+                        <td>@item.Product?.Name</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.UnitPrice.ToString("n0")</td>
+                        <td>@subtotal.ToString("n0")</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" class="text-end"><strong>Tổng cộng</strong></td>
+                    <td><strong>@total.ToString("n0") VNĐ</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+        
+        @* Thêm khu vực ký tên cho các bên liên quan *@
+        <div class="signature-section">
+            <div class="signature-box">
+                <p><strong>Người lập phiếu</strong></p>
+                <p>(Ký, họ tên)</p>
+            </div>
+             <div class="signature-box">
+                <p><strong>Người giao hàng</strong></p>
+                <p>(Ký, họ tên)</p>
+            </div>
+            <div class="signature-box">
+                <p><strong>Người nhận hàng (Thủ kho)</strong></p>
+                <p>(Ký, họ tên)</p>
+            </div>
+        </div>
+    </div>
+
+    @* --- GIAO DIỆN HIỂN THỊ TRÊN WEB (KHÔNG THAY ĐỔI) --- *@
+    <div id="display-area" class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <strong>Số phiếu:</strong> @purchaseOrder.PurchaseOrderNumber | 
+                <strong>Nhà cung cấp:</strong> @purchaseOrder.Supplier?.Name | 
+                <strong>Ngày đặt:</strong> @purchaseOrder.OrderDate.ToString("dd/MM/yyyy") |
+                <strong>Trạng thái:</strong> <span class="badge @(purchaseOrder.Status == "Đã nhận hàng" ? "bg-success" : "bg-warning text-dark")">@purchaseOrder.Status</span>
+            </div>
+            <button class="btn btn-outline-secondary" @onclick="Print">
+                <span class="oi oi-print"></span> In Phiếu
+            </button>
         </div>
         <div class="card-body">
             <h5 class="card-title">Danh sách sản phẩm</h5>
@@ -39,9 +110,8 @@ else
             </table>
         </div>
         <div class="card-footer">
-            @* Nút này chỉ hiển thị cho nhân viên Kho và khi đơn hàng chưa được xử lý *@
             <AuthorizeView Roles="Admin, Warehouse">
-                @if (purchaseOrder.Status == "Đã đặt hàng")
+                @if (purchaseOrder.Status != "Đã nhận hàng")
                 {
                     <button class="btn btn-success" @onclick="HandleReceiveItems">Xác nhận đã nhận đủ hàng</button>
                 }
@@ -70,7 +140,6 @@ else
     {
         if (purchaseOrder != null)
         {
-            // Cập nhật số lượng tồn kho cho từng sản phẩm
             foreach (var item in purchaseOrder.Items)
             {
                 var productInDb = await DbContext.Products.FindAsync(item.ProductId);
@@ -79,12 +148,17 @@ else
                     productInDb.StockQuantity += item.Quantity;
                 }
             }
-            
-            // Cập nhật trạng thái đơn nhập hàng
             purchaseOrder.Status = "Đã nhận hàng";
-            
             await DbContext.SaveChangesAsync();
-            StateHasChanged(); // Cập nhật lại giao diện
+            StateHasChanged();
         }
     }
+    
+    // Hàm gọi JavaScript để in
+    private async Task Print()
+    {
+        // Gọi hàm triggerPrint() toàn cục đã được định nghĩa trong _Host.cshtml
+        await JSRuntime.InvokeVoidAsync("triggerPrint");
+    }
 }
+
