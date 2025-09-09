@@ -16,6 +16,12 @@ namespace DoAnTotNghiep.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         
+        // --- THÊM CÁC BẢNG MỚI CHO CRM ---
+        public DbSet<Supplier> Suppliers { get; set; }
+        public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+        public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
     }
 }
+
+    
 
