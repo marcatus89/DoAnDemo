@@ -32,6 +32,10 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Users/lethien/Desktop/C\#/Sanity/DoAnTotNghiep/Models/PurchaseOrderDetail.razor]
+build_metadata.AdditionalFiles.TargetPath = TW9kZWxzL1B1cmNoYXNlT3JkZXJEZXRhaWwucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/lethien/Desktop/C\#/Sanity/DoAnTotNghiep/Pages/Admin/CategoryEdit.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQWRtaW4vQ2F0ZWdvcnlFZGl0LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
@@ -66,6 +70,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/Users/lethien/Desktop/C\#/Sanity/DoAnTotNghiep/Pages/Admin/ProductManagement.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQWRtaW4vUHJvZHVjdE1hbmFnZW1lbnQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/lethien/Desktop/C\#/Sanity/DoAnTotNghiep/Pages/Admin/PurchaseOrderAdd.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQWRtaW4vUHVyY2hhc2VPcmRlckFkZC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/lethien/Desktop/C\#/Sanity/DoAnTotNghiep/Pages/Admin/PurchaseOrderManagement.razor]

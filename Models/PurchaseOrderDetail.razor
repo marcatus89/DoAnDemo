@@ -1,0 +1,90 @@
+@page "/admin/purchase-orders/{PurchaseOrderId:int}"
+@attribute [Authorize(Roles = "Admin, Purchasing, Warehouse")]
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
+@inject NavigationManager Navigation
+
+<h3>Chi tiết Đơn nhập hàng #@PurchaseOrderId</h3>
+
+@if (purchaseOrder == null)
+{
+    <LoadingSpinner />
+}
+else
+{
+    <div class="card">
+        <div class="card-header">
+            <strong>Nhà cung cấp:</strong> @purchaseOrder.Supplier?.Name | 
+            <strong>Ngày đặt:</strong> @purchaseOrder.OrderDate.ToString("dd/MM/yyyy") |
+            <strong>Trạng thái:</strong> <span class="badge @(purchaseOrder.Status == "Đã nhận hàng" ? "bg-success" : "bg-warning text-dark")">@purchaseOrder.Status</span>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Danh sách sản phẩm</h5>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Số lượng đặt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in purchaseOrder.Items)
+                    {
+                        <tr>
+                            <td>@item.Product?.Name</td>
+                            <td>@item.Quantity</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer">
+            @* Nút này chỉ hiển thị cho nhân viên Kho và khi đơn hàng chưa được xử lý *@
+            <AuthorizeView Roles="Admin, Warehouse">
+                @if (purchaseOrder.Status == "Đã đặt hàng")
+                {
+                    <button class="btn btn-success" @onclick="HandleReceiveItems">Xác nhận đã nhận đủ hàng</button>
+                }
+            </AuthorizeView>
+            <a href="/admin/purchase-orders" class="btn btn-secondary">Quay lại</a>
+        </div>
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public int PurchaseOrderId { get; set; }
+    private PurchaseOrder? purchaseOrder;
+
+    protected override async Task OnInitializedAsync()
+    {
+        purchaseOrder = await DbContext.PurchaseOrders
+            .Include(po => po.Supplier)
+            .Include(po => po.Items)
+                .ThenInclude(item => item.Product)
+            .FirstOrDefaultAsync(po => po.Id == PurchaseOrderId);
+    }
+
+    private async Task HandleReceiveItems()
+    {
+        if (purchaseOrder != null)
+        {
+            // Cập nhật số lượng tồn kho cho từng sản phẩm
+            foreach (var item in purchaseOrder.Items)
+            {
+                var productInDb = await DbContext.Products.FindAsync(item.ProductId);
+                if (productInDb != null)
+                {
+                    productInDb.StockQuantity += item.Quantity;
+                }
+            }
+            
+            // Cập nhật trạng thái đơn nhập hàng
+            purchaseOrder.Status = "Đã nhận hàng";
+            
+            await DbContext.SaveChangesAsync();
+            StateHasChanged(); // Cập nhật lại giao diện
+        }
+    }
+}
